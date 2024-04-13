@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <initializer_list>
+#include "ReverseIterator.h"
 
 namespace dhb{
     template<typename T>
@@ -10,6 +11,7 @@ namespace dhb{
     public:
         typedef T* iterator;
         typedef const T* const_iterator;
+        typedef ReverseIterator<iterator, T*, T&> reverse_iterator;
 
         //ctor & dtor
         vector() = default;
@@ -38,6 +40,8 @@ namespace dhb{
         //Iterator
         iterator begin();
         iterator end();
+        reverse_iterator rbegin();
+        reverse_iterator rend();
         const_iterator begin() const;
         const_iterator end() const;
 
@@ -163,6 +167,18 @@ namespace dhb{
     template<typename T>
     typename vector<T>::iterator vector<T>::end(){
         return _finish;
+    }
+
+    template<typename T>
+    typename vector<T>::reverse_iterator vector<T>::rbegin()
+    {
+       return end();
+    }
+
+    template<typename T>
+    typename vector<T>::reverse_iterator vector<T>::rend()
+    {
+        return begin();
     }
 
     template<typename T>
@@ -391,6 +407,30 @@ namespace dhb{
         v1.erase(v1.begin());
         v1.erase(v1.end() - 1);
         print(v1);
+     }
+
+     void test_vector4()
+     {
+         vector<std::string> vs{"hello", ",", "world", "!"};
+         auto rit = vs.rbegin();
+         while(rit != vs.rend())
+         {
+             std::cout << *rit << ' ';
+             ++rit;
+         }
+         std::cout << std::endl;
+
+         struct A{
+             int _a;
+         };
+         vector<A>  v{{1}, {2}, {3}, {4}};
+         auto ritV = v.rbegin();
+         while(ritV != v.rend())
+         {
+             std::cout << ritV->_a << ' ';
+             //++ritV;
+         }
+         std::cout << std::endl;
      }
 }
 #endif //VECTOR_VECTOR_HPP
