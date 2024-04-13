@@ -4,20 +4,22 @@
 
 #ifndef LIST_LIST_HPP
 #define LIST_LIST_HPP
+
 #include <iostream>
 #include <string>
 #include <cassert>
 #include <initializer_list>
+#include "ReverseIterator.h"
 
-namespace dhb{
+namespace dhb {
     template<typename T>
-    struct ListNode{
+    struct ListNode {
         T _data;
-        ListNode<T>* _prev;
-        ListNode<T>* _next;
-        explicit ListNode(const T& val = T())
-        :_data(val), _prev(nullptr), _next(nullptr)
-        { }
+        ListNode<T> *_prev;
+        ListNode<T> *_next;
+
+        explicit ListNode(const T &val = T())
+                : _data(val), _prev(nullptr), _next(nullptr) {}
     };
 
     /**
@@ -29,113 +31,138 @@ namespace dhb{
      * 资源的释放由list类负责，所以不需要担心内存泄漏问题。
      */
     template<typename T, typename Ptr, typename Ref>
-    struct ListIterator{
+    struct ListIterator {
         typedef ListNode<T> Node;
         typedef ListIterator<T, Ptr, Ref> Self;
-        Node* _node;
+        Node *_node;
+
         //会去调用ListNode的构造函数
-        ListIterator(Node* node)
-        :_node(node)
-        { }
-        ListIterator(const Self& other)
-        :_node(other._node)
-        {
+        ListIterator(Node *node)
+                : _node(node) {}
+
+        ListIterator(const Self &other)
+                : _node(other._node) {
         }
 
 
-        Self& operator++(){
+        Self &operator++() {
             _node = _node->_next;
             return *this;
         }
 
-        Self operator++(int){
+        Self operator++(int) {
             //ListIterator<T, Ptr, Ref> tmp(*this);//调用默认生成的拷贝构造函数
             Self tmp(_node);
             _node = _node->_next;
             return tmp;
         }
 
-        Self& operator--(){
+        Self &operator--() {
             _node = _node->_prev;
             return *this;
         }
 
-        Self operator--(int){
+        Self operator--(int) {
             Self tmp(_node);
             _node = _node->_prev;
             return tmp;
         }
 
 
-        bool operator !=(const Self& other){
+        bool operator!=(const Self &other) {
             return _node != other._node;
         }
-        bool operator ==(const Self& other){
+
+        bool operator==(const Self &other) {
             return _node == other._node;
         }
 
         //it->
         // T*
-        Ptr operator->(){
+        Ptr operator->() {
             return &(_node->_data);
         }
 
         // T&
         //*it
-        Ref operator *(){
-           return _node->_data;
+        Ref operator*() {
+            return _node->_data;
         }
 
     };
 
     template<typename T>
-    class list{
+    class list {
         typedef ListNode<T> Node;
     public:
-        typedef ListIterator<T, T*, T&> iterator;
-        typedef ListIterator<T, const T*, const T&> const_iterator;
-       //ctor & dtor & operator=
-       list();
-       ~list();
-       list(const list<T>& lt);
-       template<typename InputIterator>
-       list(InputIterator first, InputIterator last);
-       list(std::initializer_list<T> il);
-       list& operator=(list<T> lt);
+        typedef ListIterator<T, T *, T &> iterator;
+        typedef ListIterator<T, const T *, const T &> const_iterator;
+        typedef ReverseIterator<iterator, T *, T &> reverse_iterator;
+
+        //ctor & dtor & operator=
+        list();
+
+        ~list();
+
+        list(const list<T> &lt);
+
+        template<typename InputIterator>
+        list(InputIterator first, InputIterator last);
+
+        list(std::initializer_list<T> il);
+
+        list &operator=(list<T> lt);
 
 
-       //iterator
-       iterator begin();
-       iterator end();
-       const_iterator begin() const;
-       const_iterator end() const;
+        //iterator
+        iterator begin();
 
-       //capacity
-       size_t size() const;
-       bool empty() const;
+        iterator end();
 
-       //modifiers
-       void empty_init();
-       void swap(list<T>& lt);
-       void push_front(const T& val);
-       void pop_front();
-       void push_back(const T& val);
-       void pop_back();
-       void insert(iterator pos, const T & val);
-       iterator erase(iterator pos);
-       void clear();
+        reverse_iterator rbegin();
+
+        reverse_iterator rend();
+
+        const_iterator begin() const;
+
+        const_iterator end() const;
+
+        //capacity
+        size_t size() const;
+
+        bool empty() const;
+
+        //modifiers
+        void empty_init();
+
+        void swap(list<T> &lt);
+
+        void push_front(const T &val);
+
+        void pop_front();
+
+        void push_back(const T &val);
+
+        void pop_back();
+
+        void insert(iterator pos, const T &val);
+
+        iterator erase(iterator pos);
+
+        void clear();
+
     private:
-        Node* _head;
+        Node *_head;
         size_t _size;
     };
 
     template<typename T>
-    list<T>::list(){
+    list<T>::list() {
         empty_init();
     }
 
     template<typename T>
-    list<T>::~list(){
+    list<T>::~list() {
         clear();
         delete _head;
         _head = nullptr;
@@ -143,7 +170,7 @@ namespace dhb{
     }
 
     template<typename T>
-    list<T>::list(const list<T>& lt){
+    list<T>::list(const list<T> &lt) {
         /**
          * empty_init很重要
          */
@@ -152,18 +179,18 @@ namespace dhb{
         /**
          * error: swap(*this, tmp);自带传递参数this
          */
-         swap(tmp);
+        swap(tmp);
     }
 
     template<typename T>
     template<typename InputIterator>
-    list<T>::list(InputIterator first, InputIterator last){
+    list<T>::list(InputIterator first, InputIterator last) {
         /**
          * empty_init很重要
          */
         empty_init();
         auto it = first;
-        while(it != last){
+        while (it != last) {
             push_back(*it);
             ++it;
             /**
@@ -173,8 +200,9 @@ namespace dhb{
 
         }
     }
+
     template<typename T>
-    list<T>::list(std::initializer_list<T> il){
+    list<T>::list(std::initializer_list<T> il) {
         /**
          * empty_init很重要
          */
@@ -185,8 +213,9 @@ namespace dhb{
          */
         swap(tmp);
     }
+
     template<typename T>
-    list<T>& list<T>::operator=(list<T> lt){
+    list<T> &list<T>::operator=(list<T> lt) {
         /**
          * error: swap(*this, tmp);自带传递参数this
          */
@@ -196,55 +225,72 @@ namespace dhb{
          */
         return *this;
     }
+
     template<typename T>
-    typename list<T>::iterator list<T>::begin(){
-        return  _head->_next;
+    typename list<T>::iterator list<T>::begin() {
+        return _head->_next;
     }
 
     template<typename T>
-    typename list<T>::iterator list<T>::end(){
+    typename list<T>::iterator list<T>::end() {
         return _head;
     }
 
     template<typename T>
-    typename list<T>::const_iterator list<T>::begin()const{
-        return  _head->_next;
+    typename list<T>::reverse_iterator list<T>::rbegin()
+    {
+        return end();
     }
 
     template<typename T>
-    typename list<T>::const_iterator list<T>::end()const{
+    typename list<T>::reverse_iterator list<T>::rend()
+    {
+        return begin();
+    }
+
+
+    template<typename T>
+    typename list<T>::const_iterator list<T>::begin() const {
+        return _head->_next;
+    }
+
+    template<typename T>
+    typename list<T>::const_iterator list<T>::end() const {
         return _head;
     }
+
     template<typename T>
-    size_t list<T>::size() const{
+    size_t list<T>::size() const {
         return _size;
     }
+
     template<typename T>
-    bool list<T>::empty() const{
+    bool list<T>::empty() const {
         return _head->_next == _head;
     }
 
     template<typename T>
-    void list<T>::empty_init(){
+    void list<T>::empty_init() {
         _head = new Node();
-        _size= 0;
+        _size = 0;
         _head->_next = _head;
         _head->_prev = _head;
     }
 
 
     template<typename T>
-    void list<T>::swap(list<T>& lt){
+    void list<T>::swap(list<T> &lt) {
         std::swap(_head, lt._head);
         std::swap(_size, lt._size);
     }
+
     template<typename T>
-    void list<T>::push_front(const T& val){
+    void list<T>::push_front(const T &val) {
         insert(begin(), val);
     }
 
     template<typename T>
-    void list<T>::push_back(const T& val){
+    void list<T>::push_back(const T &val) {
         insert(end(), val);
     }
 
@@ -256,10 +302,10 @@ namespace dhb{
      * 是Node*在插入删除链接
      */
     template<typename T>
-    void list<T>::insert(typename list<T>::iterator pos, const T& val){
-        Node* cur = pos._node;
-        Node* prev = cur->_prev;
-        Node* newNode = new Node(val);
+    void list<T>::insert(typename list<T>::iterator pos, const T &val) {
+        Node *cur = pos._node;
+        Node *prev = cur->_prev;
+        Node *newNode = new Node(val);
         newNode->_prev = prev;
         newNode->_next = cur;
         prev->_next = newNode;
@@ -271,24 +317,23 @@ namespace dhb{
     }
 
     template<typename T>
-    void list<T>::pop_front(){
+    void list<T>::pop_front() {
         erase(begin());
     }
 
     template<typename T>
-    void list<T>::pop_back(){
+    void list<T>::pop_back() {
         erase(--end());
     }
 
 
-
     template<typename T>
-    typename list<T>::iterator list<T>::erase(typename list<T>::iterator pos){
+    typename list<T>::iterator list<T>::erase(typename list<T>::iterator pos) {
         assert(empty() == false);
         //_node是pos的成员变量
-        Node* cur = pos._node;
-        Node* prev = cur->_prev;
-        Node* next = cur->_next;
+        Node *cur = pos._node;
+        Node *prev = cur->_prev;
+        Node *next = cur->_next;
 
         prev->_next = next;
         next->_prev = prev;
@@ -301,16 +346,16 @@ namespace dhb{
     }
 
     template<typename T>
-    void list<T>::clear(){
-        Node* cur = _head->_next;
-        while(cur != _head){
-            Node* next = cur->_next;
+    void list<T>::clear() {
+        Node *cur = _head->_next;
+        while (cur != _head) {
+            Node *next = cur->_next;
             delete cur;
             cur = next;
         }
     }
 
-    void testList1(){
+    void testList1() {
         list<int> lt;
         lt.push_back(1);
         lt.push_back(2);
@@ -318,11 +363,11 @@ namespace dhb{
         lt.push_back(4);
         lt.push_back(5);
         lt.push_front(0);
-        for(auto it = lt.begin(); it != lt.end(); ++it){
+        for (auto it = lt.begin(); it != lt.end(); ++it) {
             std::cout << *it << " ";
         }
         std::cout << '\n';
-        for(auto e : lt){
+        for (auto e: lt) {
             std::cout << e << " ";
         }
         std::cout << "size: " << lt.size() << '\n';
@@ -330,7 +375,7 @@ namespace dhb{
 
     }
 
-    void testList2(){
+    void testList2() {
         list<int> lt;
         lt.push_back(1);
         lt.push_back(2);
@@ -338,48 +383,72 @@ namespace dhb{
         auto iter = lt.begin();
         ++iter;
         lt.insert(iter, 4);
-        for(auto e : lt){
+        for (auto e: lt) {
             std::cout << e << " ";
         }
         std::cout << '\n';
 
         lt.pop_front();
         lt.pop_back();
-        for(auto e : lt){
+        for (auto e: lt) {
             std::cout << e << " ";
         }
         std::cout << '\n';
 
         lt.push_back(5);
-        for(auto e : lt){
+        for (auto e: lt) {
             std::cout << e << " ";
         }
         std::cout << '\n';
         lt.erase(++lt.begin());
-        for(auto e : lt) {
+        for (auto e: lt) {
             std::cout << e << " ";
         }
         std::cout << '\n';
     }
 
-    void testList3(){
+    void testList3() {
         list<std::string> lt = {"hello", ",", "world", "!"};
-        for(auto &e : lt) {
+        for (auto &e: lt) {
             std::cout << e << " ";
         }
         std::cout << "size: " << lt.size() << '\n';
         std::cout << '\n';
         list<std::string> lt2(lt);
-        for(auto &e : lt2) {
+        for (auto &e: lt2) {
             std::cout << e << " ";
         }
         std::cout << "size: " << lt.size() << '\n';
         std::cout << '\n';
         lt2 = {"a", "b", "c"};
-        for(auto &e : lt2) {
+        for (auto &e: lt2) {
             std::cout << e << " ";
         }
         std::cout << "size: " << lt2.size() << '\n';
+        std::cout << std::endl;
+    }
+
+    void testList4() {
+        list<int> lt{1, 2, 3, 4};
+        list<int>::reverse_iterator rit = lt.rbegin();
+        while(rit != lt.rend())
+        {
+            std::cout << *rit << ' ';
+            rit++;
+        }
+        std::cout << std::endl;
+
+        struct A{
+            int _data;
+        };
+        list<A> ltA{{1}, {2}, {3}, {4}};
+        auto ritA = ltA.rbegin();
+        while(ritA != ltA.rend())
+        {
+            std::cout << ritA->_data << ' ';
+            ++ritA;
+        }
+        std::cout << std::endl;
     }
 
 }
