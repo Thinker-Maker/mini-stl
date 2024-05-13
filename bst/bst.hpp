@@ -392,6 +392,7 @@ namespace dhb_kv
                     }
 
                     cur->m_key = rmin->m_key;
+                    cur->m_value = rmin->m_value;
                     if(rmin_parent == cur)
                         rmin_parent->right = rmin->right;
                     else
